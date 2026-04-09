@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { AMNESYA_BOTTLES, AMNESYA_EVENT, AMNESYA_PACKAGES } from "@/lib/venues/amnesya-data";
 import { estimateBookingTotal } from "@/lib/pricing/estimate-booking-total";
+import { submitAmnesyaBooking, type BookingActionState } from "@/app/(public)/amnesya/event/[eventSlug]/actions";
 
 const OCCASIONS = [
   { id: "serata", label: "Serata" },
@@ -13,12 +14,24 @@ const OCCASIONS = [
   { id: "altro", label: "Altro" },
 ] as const;
 
+const INITIAL_ACTION_STATE: BookingActionState = {
+  ok: false,
+  message: "Compila e invia per validare il payload booking.",
+};
+
 export function AmnesyaEventShowcase() {
   const [selectedPackageId, setSelectedPackageId] = useState<string>(AMNESYA_PACKAGES[0].id);
   const [extraGuests, setExtraGuests] = useState(0);
   const [occasion, setOccasion] = useState<string>("serata");
   const [includedSelection, setIncludedSelection] = useState<Record<number, string>>({ 0: "absolut" });
   const [extraBottleQuantities, setExtraBottleQuantities] = useState<Record<string, number>>({});
+  const [name, setName] = useState("");
+  const [surname, setSurname] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [actionState, setActionState] = useState<BookingActionState>(INITIAL_ACTION_STATE);
+  const [isSubmitting, startTransition] = useTransition();
 
   const selectedPackage = useMemo(
     () => AMNESYA_PACKAGES.find((pkg) => pkg.id === selectedPackageId) ?? AMNESYA_PACKAGES[0],
@@ -85,10 +98,12 @@ export function AmnesyaEventShowcase() {
     setSelectedPackageId(packageId);
     setExtraGuests(0);
     setIncludedSelection(nextSelection);
+    setActionState(INITIAL_ACTION_STATE);
   }
 
   function updateIncludedBottle(slotIndex: number, bottleId: string) {
     setIncludedSelection((current) => ({ ...current, [slotIndex]: bottleId }));
+    setActionState(INITIAL_ACTION_STATE);
   }
 
   function updateExtraBottle(bottleId: string, delta: number) {
@@ -96,9 +111,30 @@ export function AmnesyaEventShowcase() {
       const nextValue = Math.max(0, (current[bottleId] ?? 0) + delta);
       return { ...current, [bottleId]: nextValue };
     });
+    setActionState(INITIAL_ACTION_STATE);
   }
 
-  const totalVisibleBottleCount = selectedIncludedBottles.length + extraBottles.reduce((sum, bottle) => sum + bottle.quantity, 0);
+  async function handleSubmit() {
+    startTransition(async () => {
+      const result = await submitAmnesyaBooking({
+        packageId: selectedPackage.id,
+        name,
+        surname,
+        email,
+        phone,
+        notes,
+        occasion,
+        extraGuests,
+        includedBottleIds,
+        extraBottleQuantities,
+      });
+
+      setActionState(result);
+    });
+  }
+
+  const totalVisibleBottleCount =
+    selectedIncludedBottles.length + extraBottles.reduce((sum, bottle) => sum + bottle.quantity, 0);
 
   return (
     <main className="min-h-screen px-6 py-12 md:px-8 md:py-16">
@@ -124,7 +160,7 @@ export function AmnesyaEventShowcase() {
               <p className="text-xs uppercase tracking-[0.35em] text-[var(--gold)]">Wizard preview</p>
               <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Configura la tua serata</h2>
               <p className="max-w-2xl text-base leading-8 text-[var(--muted)]">
-                Questa è la prima versione visibile del flow Tavolè: selezioni pacchetto, incluse, extra e dettagli.
+                Ora non è solo una preview UI. Ho già preparato il submit logico con validazione e payload booking.
               </p>
             </div>
 
@@ -302,20 +338,45 @@ export function AmnesyaEventShowcase() {
                 </div>
 
                 <div className="grid gap-4 rounded-[24px] border border-[var(--stroke)] bg-[rgba(255,255,255,0.03)] p-5 md:grid-cols-2">
-                  {[
-                    "Nome",
-                    "Cognome",
-                    "Email",
-                    "Telefono",
-                  ].map((field) => (
-                    <label key={field} className="grid gap-2 text-sm text-[var(--muted)]">
-                      {field}
-                      <input
-                        placeholder={field}
-                        className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
-                      />
-                    </label>
-                  ))}
+                  <label className="grid gap-2 text-sm text-[var(--muted)]">
+                    Nome
+                    <input
+                      value={name}
+                      onChange={(event) => setName(event.target.value)}
+                      placeholder="Nome"
+                      className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm text-[var(--muted)]">
+                    Cognome
+                    <input
+                      value={surname}
+                      onChange={(event) => setSurname(event.target.value)}
+                      placeholder="Cognome"
+                      className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm text-[var(--muted)]">
+                    Email
+                    <input
+                      value={email}
+                      onChange={(event) => setEmail(event.target.value)}
+                      placeholder="Email"
+                      className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
+                    />
+                  </label>
+
+                  <label className="grid gap-2 text-sm text-[var(--muted)]">
+                    Telefono
+                    <input
+                      value={phone}
+                      onChange={(event) => setPhone(event.target.value)}
+                      placeholder="Telefono"
+                      className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
+                    />
+                  </label>
 
                   <div className="md:col-span-2">
                     <p className="mb-2 text-sm text-[var(--muted)]">Occasione</p>
@@ -340,6 +401,8 @@ export function AmnesyaEventShowcase() {
                   <label className="grid gap-2 text-sm text-[var(--muted)] md:col-span-2">
                     Note
                     <textarea
+                      value={notes}
+                      onChange={(event) => setNotes(event.target.value)}
                       placeholder="Richieste particolari, dettagli gruppo, note utili"
                       rows={5}
                       className="rounded-2xl border border-[var(--stroke)] bg-[rgba(0,0,0,0.2)] px-4 py-3 text-[var(--foreground)] outline-none"
@@ -372,7 +435,10 @@ export function AmnesyaEventShowcase() {
               })}
 
               <div className="absolute flex flex-wrap items-center justify-center gap-3 px-10">
-                {[...selectedIncludedBottles, ...extraBottles.flatMap((bottle) => Array.from({ length: bottle.quantity }).map(() => bottle))]
+                {[
+                  ...selectedIncludedBottles,
+                  ...extraBottles.flatMap((bottle) => Array.from({ length: bottle.quantity }).map(() => bottle)),
+                ]
                   .slice(0, 8)
                   .map((bottle, index) => (
                     <div
@@ -427,15 +493,30 @@ export function AmnesyaEventShowcase() {
               </div>
               <button
                 type="button"
-                className="rounded-full border border-[var(--gold)] px-5 py-3 text-sm uppercase tracking-[0.24em] text-[var(--gold-light)] transition hover:bg-[rgba(201,168,76,0.08)]"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className="rounded-full border border-[var(--gold)] px-5 py-3 text-sm uppercase tracking-[0.24em] text-[var(--gold-light)] transition hover:bg-[rgba(201,168,76,0.08)] disabled:opacity-60"
               >
-                Invia richiesta
+                {isSubmitting ? "Invio..." : "Invia richiesta"}
               </button>
             </div>
 
-            <p className="mt-4 text-sm leading-7 text-[var(--muted)]">
-              Occasione: {OCCASIONS.find((item) => item.id === occasion)?.label}. Questa è una preview interattiva del primo flusso UI, non ancora collegata al database.
-            </p>
+            <div className={`mt-5 rounded-2xl border px-4 py-4 text-sm leading-7 ${actionState.ok ? "border-[rgba(117,215,157,0.35)] bg-[rgba(117,215,157,0.08)] text-[rgb(196,255,218)]" : "border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--muted)]"}`}>
+              <p className="font-medium">{actionState.message}</p>
+              {actionState.errors?.length ? (
+                <ul className="mt-3 list-disc pl-5">
+                  {actionState.errors.map((error) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+
+            {actionState.payload ? (
+              <pre className="mt-4 overflow-x-auto rounded-2xl border border-[rgba(255,255,255,0.08)] bg-[rgba(0,0,0,0.22)] p-4 text-xs leading-6 text-[var(--gold-light)]">
+                {JSON.stringify(actionState.payload, null, 2)}
+              </pre>
+            ) : null}
           </div>
         </aside>
       </div>
