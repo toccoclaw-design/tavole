@@ -1,6 +1,7 @@
 "use server";
 
 import { createBookingPayload } from "@/services/bookings/create-booking-payload";
+import { persistBooking } from "@/services/bookings/save-booking";
 import { validateBookingForm, type BookingFormInput } from "@/lib/validation/booking";
 import { AMNESYA_PACKAGES } from "@/lib/venues/amnesya-data";
 
@@ -9,6 +10,7 @@ export type BookingActionState = {
   message: string;
   errors?: string[];
   payload?: unknown;
+  bookingId?: string;
 };
 
 export async function submitAmnesyaBooking(
@@ -35,10 +37,12 @@ export async function submitAmnesyaBooking(
   }
 
   const payload = createBookingPayload(input, selectedPackage);
+  const persisted = await persistBooking(payload);
 
   return {
     ok: true,
-    message: "Payload booking pronto. Prossimo step: salvataggio su database.",
-    payload,
+    message: "Booking salvato nello store mock. Prossimo step: sostituzione con persistenza Supabase reale.",
+    payload: persisted,
+    bookingId: persisted.id,
   };
 }

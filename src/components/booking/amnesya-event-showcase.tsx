@@ -503,6 +503,11 @@ export function AmnesyaEventShowcase() {
 
             <div className={`mt-5 rounded-2xl border px-4 py-4 text-sm leading-7 ${actionState.ok ? "border-[rgba(117,215,157,0.35)] bg-[rgba(117,215,157,0.08)] text-[rgb(196,255,218)]" : "border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.03)] text-[var(--muted)]"}`}>
               <p className="font-medium">{actionState.message}</p>
+              {actionState.bookingId ? (
+                <p className="mt-2 text-xs uppercase tracking-[0.22em] text-[var(--gold-light)]">
+                  Booking ID: {actionState.bookingId}
+                </p>
+              ) : null}
               {actionState.errors?.length ? (
                 <ul className="mt-3 list-disc pl-5">
                   {actionState.errors.map((error) => (
