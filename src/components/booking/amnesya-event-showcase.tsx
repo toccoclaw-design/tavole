@@ -439,6 +439,7 @@ export function AmnesyaEventShowcase() {
                   ...selectedIncludedBottles,
                   ...extraBottles.flatMap((bottle) => Array.from({ length: bottle.quantity }).map(() => bottle)),
                 ]
+                  .filter((bottle) => Boolean(bottle))
                   .slice(0, 8)
                   .map((bottle, index) => (
                     <div
