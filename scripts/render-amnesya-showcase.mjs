@@ -186,6 +186,11 @@ const html = `<!doctype html>
         <h1>Que Clase Saturday</h1>
         <p style="text-transform:uppercase; letter-spacing:.28em; color:var(--gold-light);">Sabato 12 Aprile 2026</p>
         <p class="muted">Prima preview visibile del flow Tavolè: booking evento, pacchetti, bottiglie incluse, extra e riepilogo dinamico.</p>
+        <div style="margin-top:24px; display:flex; flex-wrap:wrap; gap:12px;">
+          <div class="tag active">Luxury nightclub</div>
+          <div class="tag">Pacchetti evento</div>
+          <div class="tag">Conferma manuale locale</div>
+        </div>
       </section>
 
       <section class="card wizard">
@@ -193,6 +198,13 @@ const html = `<!doctype html>
           <div class="eyebrow">Wizard preview</div>
           <h2>Configura la tua serata</h2>
           <p class="muted">Qui stiamo trasformando il progetto in una vera esperienza prenotazione, non più in una demo buttata lì.</p>
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:26px;">
+          <div class="tag active">1 · Pacchetto</div>
+          <div class="tag active">2 · Bottiglie incluse</div>
+          <div class="tag active">3 · Extra</div>
+          <div class="tag active">4 · Dettagli</div>
         </div>
 
         <div class="step">
@@ -204,6 +216,10 @@ const html = `<!doctype html>
             <div class="package active">
               <div class="meta"><div><div class="eyebrow">base</div><h3>6 Base</h3></div><div class="price">€ 150</div></div>
               <p class="muted">6 persone, 1 bottiglia inclusa, ospite extra € 25.</p>
+              <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                <span class="tag active">Pacchetto attivo</span>
+                <span class="tag">1 bottiglia inclusa</span>
+              </div>
             </div>
             <div class="package"><div class="meta"><div><div class="eyebrow">premium</div><h3>6 Premium</h3></div><div class="price">€ 180</div></div><p class="muted">6 persone, 1 bottiglia premium inclusa.</p></div>
             <div class="package"><div class="meta"><div><div class="eyebrow">base</div><h3>8 Base</h3></div><div class="price">€ 250</div></div><p class="muted">8 persone, 2 bottiglie base incluse.</p></div>
@@ -216,6 +232,7 @@ const html = `<!doctype html>
           <div class="grid-2">
             <div class="slot active">
               <div class="eyebrow">Bottiglia inclusa 1</div>
+              <p class="muted" style="margin:10px 0 0;">Scelta obbligatoria in base al package selezionato.</p>
               <div class="options" style="margin-top:16px;">
                 <div class="option"><span>🍸 Absolut Vodka</span><span class="muted">Inclusa</span></div>
                 <div class="option"><span>🍸 Bombay Gin</span><span class="muted">Inclusa</span></div>
@@ -240,6 +257,7 @@ const html = `<!doctype html>
             </div>
             <div class="extra">
               <div class="eyebrow">Bottiglie extra</div>
+              <p class="muted" style="margin-top:10px;">Le bottiglie premium speciali stanno qui, fuori dalle incluse.</p>
               <div class="options" style="margin-top:16px;">
                 <div class="option"><span>🍾 Moët Imperial × 1</span><span>€ 150</span></div>
                 <div class="option"><span>🍾 Dom Pérignon × 1</span><span>€ 500</span></div>
@@ -297,6 +315,7 @@ const html = `<!doctype html>
 
       <section class="card summary">
         <div class="eyebrow">Riepilogo</div>
+        <p class="muted" style="margin-top:14px;">Questa colonna deve diventare il cervello visivo della prenotazione: chiara, veloce e sempre leggibile.</p>
         <div style="margin-top:20px;">
           <div class="line"><span>6 Base</span><strong>€ 150</strong></div>
           <div class="line mutedline"><span>↳ Inclusa 1: Absolut Vodka</span><span>incl.</span></div>
